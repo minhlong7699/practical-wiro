@@ -84,9 +84,59 @@
           class="product__info-container{% if section.settings.enable_sticky_info %} product__column-sticky{% endif %}"
         >
           {%- assign product_form_id = 'product-form-' | append: section.id -%}
-
           {%- for block in section.blocks -%}
             {%- case block.type -%}
+              {% when 'gift_wrap' %}
+                {% assign gift_wrap_metaobject = product.metafields.custom.gift_wrap.value %}
+                {% assign gift_wrap_product_id = gift_wrap_metaobject.gift_wrap_product %}
+                {% assign gift_wrap_product = all_products[gift_wrap_product_id] %}
+                {% if gift_wrap_product %}
+                  {% assign gift_wrap_variant = gift_wrap_product.variants | first %}
+                  <p>{{ product.selected_or_first_available_variant.id }}</p>
+                  {% assign gift_wrap_price = gift_wrap_variant.price %}
+                  {% assign message_text_limit = gift_wrap_metaobject.message_text_limit %}
+                  <gift-wrap
+                    data-product-id="{{ product.id }}"
+                    data-gift-wrap-id="{{ gift_wrap_variant.id }}"
+                    data-gift-wrap-price="{{ gift_wrap_price }}"
+                    data-message-text-limit="{{ message_text_limit }}"
+                  >
+                    <label>
+                      <input
+                        type="checkbox"
+                        data-gift-wrap-checkbox
+                        name="gift-wrap"
+                      >
+                      Gói quà tặng (+{{ gift_wrap_price | money }})
+                    </label>
+                    <div data-gift-wrap-fields class="hidden">
+                      <input
+                        type="hidden"
+                        name="properties[Gift Wrap Price]"
+                        data-gift-wrap-price
+                        value="{{ gift_wrap_price }}"
+                      >
+                      <label
+                        >From:
+                        <input type="text" name="properties[Gift From]" form="{{ product_form_id }}" data-gift-from>
+                      </label>
+                      <label
+                        >To:
+                        <input type="text" name="properties[Gift To]" form="{{ product_form_id }}" data-gift-to>
+                      </label>
+                      <label
+                        >Message:
+                        <textarea
+                          name="properties[Gift Message]"
+                          data-gift-message
+                          maxlength="{{ message_text_limit }}"
+                          form="{{ product_form_id }}"
+                        ></textarea>
+                      </label>
+                    </div>
+                  </gift-wrap>
+                {% endif %}
+
               {%- when '@app' -%}
                 {% render block %}
               {%- when 'text' -%}
@@ -732,6 +782,19 @@
   "blocks": [
     {
       "type": "@app"
+    },
+    {
+      "type": "gift_wrap",
+      "name": "Enable Gift Wrap",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "gift_wrap_enabled",
+          "label": "Enable Gift Wrap",
+          "default": true
+        }
+      ],
+      "limit": 1
     },
     {
       "type": "text",

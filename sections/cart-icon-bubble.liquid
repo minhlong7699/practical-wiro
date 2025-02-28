@@ -5,11 +5,21 @@
 {% endif %}
 
 <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+
 {%- if cart != empty -%}
-  <div class="cart-count-bubble">
-    {%- if cart.item_count < 100 -%}
-      <span aria-hidden="true">{{ cart.item_count }}</span>
-    {%- endif -%}
-    <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
-  </div>
+  {%- assign cart_count = 0 -%}
+
+  {%- for item in cart.items -%}
+    {%- unless item.product.tags contains 'Gift Wrap' -%}
+      {%- assign cart_count = cart_count | plus: item.quantity -%}
+    {%- endunless -%}
+  {%- endfor -%}
+  {%- if cart_count > 0 -%}
+    <div class="cart-count-bubble">
+      {%- if cart_count < 100 -%}
+        <span aria-hidden="true">{{ cart_count }}</span>
+      {%- endif -%}
+      <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart_count }}</span>
+    </div>
+  {%- endif -%}
 {%- endif -%}

@@ -5,7 +5,7 @@ class CartRemoveButton extends HTMLElement {
     this.addEventListener('click', (event) => {
       event.preventDefault();
       const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
-      cartItems.updateQuantity(this.dataset.index, 0);
+      cartItems.updateQuantity(this.dataset.index, 0, "", this.dataset.variantid);
     });
   }
 }
@@ -44,11 +44,16 @@ class CartItems extends HTMLElement {
 
   resetQuantityInput(id) {
     const input = this.querySelector(`#Quantity-${id}`);
+
+    if (!input || input.type !== 'number') return;
+
     input.value = input.getAttribute('value');
     this.isEnterPressed = false;
   }
 
   setValidity(event, index, message) {
+    if (event.target.type !== 'number') return;
+
     event.target.setCustomValidity(message);
     event.target.reportValidity();
     this.resetQuantityInput(index);
@@ -195,6 +200,60 @@ class CartItems extends HTMLElement {
         }
         this.updateLiveRegions(line, message);
 
+
+        if (quantity === 0) {
+          console.log("test");
+          parsedState.items.forEach((item, idx) => {
+            console.log(item.properties["main_variant_id"]);
+            console.log(variantId);
+            console.log("test 2");
+            if (item.properties && item.properties["main_variant_id"] && item.properties["main_variant_id"] === variantId) {
+              const removePayload = JSON.stringify({
+                line: idx + 1,
+                quantity: 0,
+                sections: this.getSectionsToRender().map((section) => section.section),
+                sections_url: window.location.pathname,
+              });
+              fetch(`${routes.cart_change_url}`, {
+                ...fetchConfig(),
+                body: removePayload,
+              })
+                .then((res) => res.text())
+                .then((newState) => {
+                  const parsedState = JSON.parse(newState);
+                  const quantityElement =
+                    document.getElementById(`Quantity-${line}`) || document.getElementById(`Drawer-quantity-${line}`);
+                  const items = document.querySelectorAll('.cart-item');
+
+                  if (parsedState.errors) {
+                    quantityElement.value = quantityElement.getAttribute('value');
+                    this.updateLiveRegions(line, parsedState.errors);
+                    return;
+                  }
+
+                  this.classList.toggle('is-empty', parsedState.item_count === 0);
+                  const cartDrawerWrapper = document.querySelector('cart-drawer');
+                  const cartFooter = document.getElementById('main-cart-footer');
+
+                  if (cartFooter) cartFooter.classList.toggle('is-empty', parsedState.item_count === 0);
+                  if (cartDrawerWrapper) cartDrawerWrapper.classList.toggle('is-empty', parsedState.item_count === 0);
+
+                  this.getSectionsToRender().forEach((section) => {
+                    const elementToReplace =
+                      document.getElementById(section.id).querySelector(section.selector) || document.getElementById(section.id);
+                    elementToReplace.innerHTML = this.getSectionInnerHTML(
+                      parsedState.sections[section.section],
+                      section.selector
+                    );
+                  });
+                  console.log("Gift wrap removed:", parsedNewState);
+                })
+                .catch((error) => {
+                  console.error("Error removing gift wrap:", error);
+                });
+            }
+          });
+        }
         const lineItem =
           document.getElementById(`CartItem-${line}`) || document.getElementById(`CartDrawer-Item-${line}`);
         if (lineItem && lineItem.querySelector(`[name="${name}"]`)) {

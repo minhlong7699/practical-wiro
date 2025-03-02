@@ -15,7 +15,8 @@ if (!customElements.get('product-form')) {
         this.giftWrapElement = document.querySelector("gift-wrap");
         this.giftWrapId = this.giftWrapElement ? this.giftWrapElement.dataset.giftWrapId : null;
 
-        console.log(this.giftWrapId);
+        this.productId = this.form.querySelector('input[name="id"]').value;
+        console.log(this.productId);
 
         this.hideErrors = this.dataset.hideErrors === 'true';
       }
@@ -52,6 +53,9 @@ if (!customElements.get('product-form')) {
           const giftWrapItem = {
             id: this.giftWrapId,
             quantity: 1,
+            properties: {
+              "main_variant_id": this.productId
+            }
           };
 
           fetch(window.Shopify.routes.root + 'cart/add.js', {

@@ -2,8 +2,6 @@ class GiftWrap extends HTMLElement {
     constructor() {
         super();
 
-        const productFormSubmit = document.querySelector('product-form');
-        this.productForm = productFormSubmit?.querySelector("form[action='/cart/add']");
         this.checkbox = this.querySelector("[data-gift-wrap-checkbox]");
         this.fieldsContainer = this.querySelector("[data-gift-wrap-fields]");
         this.giftWrapId = this.getAttribute("data-gift-wrap-id");

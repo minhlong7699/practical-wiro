@@ -92,7 +92,6 @@
                 {% assign gift_wrap_product = all_products[gift_wrap_product_id] %}
                 {% if gift_wrap_product %}
                   {% assign gift_wrap_variant = gift_wrap_product.variants | first %}
-                  <p>{{ product.selected_or_first_available_variant.id }}</p>
                   {% assign gift_wrap_price = gift_wrap_variant.price %}
                   {% assign message_text_limit = gift_wrap_metaobject.message_text_limit %}
                   <gift-wrap
@@ -101,38 +100,68 @@
                     data-gift-wrap-price="{{ gift_wrap_price }}"
                     data-message-text-limit="{{ message_text_limit }}"
                   >
-                    <label>
+                    <label class="flex items-center space-x-2 text-[13px] font-semibold">
                       <input
                         type="checkbox"
                         data-gift-wrap-checkbox
                         name="gift-wrap"
+                        class="w-7 h-7 checked:bg-black accent-black focus:ring-2 focus:ring-black rounded-sm"
                       >
-                      Gói quà tặng (+{{ gift_wrap_price | money }})
+                      <span>Wrap as a gift? (+{{ gift_wrap_price | money_with_currency }})</span>
                     </label>
-                    <div data-gift-wrap-fields class="hidden">
+
+                    <div data-gift-wrap-fields class="hidden mt-4">
+                      <input
+                        type="hidden"
+                        name="properties[_text-limit]"
+                        data-gift-wrap-price
+                        form="{{ product_form_id }}"
+                        value="{{ message_text_limit }}"
+                      >
                       <input
                         type="hidden"
                         name="properties[Gift Wrap Price]"
                         data-gift-wrap-price
+                        form="{{ product_form_id }}"
                         value="{{ gift_wrap_price }}"
                       >
-                      <label
-                        >From:
-                        <input type="text" name="properties[Gift From]" form="{{ product_form_id }}" data-gift-from>
-                      </label>
-                      <label
-                        >To:
-                        <input type="text" name="properties[Gift To]" form="{{ product_form_id }}" data-gift-to>
-                      </label>
-                      <label
-                        >Message:
+
+                      <!-- To -->
+                      <div class="mb-4">
+                        <label class="block mb-2 text-gray-600 text-[13px] font-semibold">To</label>
+                        <input
+                          type="text"
+                          name="properties[Gift To]"
+                          form="{{ product_form_id }}"
+                          data-gift-to
+                          class="border text-gray-900 text-[13px] focus:ring-black-500 focus:border-black-500 block w-full h-10 px-3 py-6"
+                          placeholder="Recipient’s name"
+                        >
+                      </div>
+                      <!-- From -->
+                      <div class="mb-4">
+                        <label class="block mb-2 text-gray-600 text-[13px] font-semibold">From</label>
+                        <input
+                          type="text"
+                          name="properties[Gift From]"
+                          form="{{ product_form_id }}"
+                          data-gift-from
+                          class="border text-gray-900 text-[13px] focus:ring-black-500 focus:border-black-500 block w-full h-10 px-3 py-6"
+                          placeholder="Sender’s name"
+                        >
+                      </div>
+                      <!-- Message -->
+                      <div class="mb-4">
+                        <label class="block mb-2 text-gray-600 text-[13px] font-semibold">Gift Message</label>
                         <textarea
                           name="properties[Gift Message]"
                           data-gift-message
                           maxlength="{{ message_text_limit }}"
                           form="{{ product_form_id }}"
+                          class="border text-gray-900 text-[13px] focus:ring-black-500 focus:border-black-500 block w-full h-40 p-3 resize-none"
+                          placeholder="Type your message here"
                         ></textarea>
-                      </label>
+                      </div>
                     </div>
                   </gift-wrap>
                 {% endif %}
